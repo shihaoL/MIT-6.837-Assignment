@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
+#include "image.h"
+#include "scene_parser.h"
 using namespace std;
 int main(int argc, char* argv[]) {
 
@@ -49,6 +51,27 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+	Image img(width, height);
+	Image gray(width, height);
+	SceneParser scence(input_file);
+	Group* g = scence.getGroup();
+	Camera* cam = scence.getCamera();
+	for (int i = 0; i <width; i ++) {
+		for (int j = 0; j < height;j++) {
+			Hit h(INFINITY,NULL);
+			Ray r = cam->generateRay({ i*1.0f/width,j*1.0f/width });
+			bool hited = g->intersect(r, h, cam->getTMin());
+			if (hited) {
+				img.SetPixel(i,j,h.getMaterial()->getDiffuseColor());
+				float t = h.getT();
+				float gray_value = 1- (t - depth_min) / (depth_max - depth_min);
+				gray.SetPixel(i,j, { gray_value,gray_value,gray_value });
+			}
+		}
+	}
+	img.SaveTGA(output_file);
+	gray.SaveTGA(depth_file);
+	printf("hello world as1");
 	// ========================================================
 	// ========================================================
 }

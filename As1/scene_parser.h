@@ -3,12 +3,15 @@
 
 #include "vectors.h"
 #include <assert.h>
-
-class Camera;
-class Material;
-class Object3D;
-class Group;
-class Sphere;
+#include "camera.h"
+#include "group.h"
+#include "sphere.h"
+#include "object3d.h"
+//class Camera;
+//class Material;
+//class Object3D;
+//class Group;
+//class Sphere;
 
 #define MAX_PARSER_TOKEN_LENGTH 100
 

@@ -81,7 +81,8 @@ int main(int argc, char* argv[]) {
 	Image* img = new Image(size, size);
 	ifs.render(img, num_points, num_iters);
 	img->SaveTGA(output_file);
-	printf("hello world");
+	printf("hello world as0");
+	system("pause");
 	// ========================================================
 	// ========================================================
 }

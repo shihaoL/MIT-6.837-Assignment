@@ -50,5 +50,17 @@
     <ClInclude Include="..\Assignment\vectors.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="object3d.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="sphere.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="group.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
