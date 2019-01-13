@@ -7,6 +7,9 @@ private:
 	float _d;
 public:
 	Plane(Vec3f &normal, float d, Material *m):_normal(normal),_d(d), Object3D(m){}
+	virtual bool intersectShadowRay(const Ray &r, Hit &h, float tmin) override {
+		return intersect(r, h, tmin);
+	}
 	virtual bool intersect(const Ray &r, Hit &h, float tmin) {
 		Vec3f dir = r.getDirection();
 		Vec3f origin = r.getOrigin();

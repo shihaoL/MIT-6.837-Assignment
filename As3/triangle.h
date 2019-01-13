@@ -6,6 +6,9 @@ public:
 		Vec3f::Cross3(_normal,b-a,c-a);
 		_normal.Normalize();
 	}
+	virtual bool intersectShadowRay(const Ray &r, Hit &h, float tmin) override {
+		return intersect(r, h, tmin);
+	}
 	virtual bool intersect(const Ray &r, Hit &h, float tmin) {
 		Vec3f dir = r.getDirection();
 		Vec3f origin = r.getOrigin();
@@ -18,7 +21,7 @@ public:
 		float beta = determinant3(td,tb,tc) / D;
 		float gama = determinant3(ta, td, tc) / D;
 		float t = determinant3(ta, tb, td) / D;
-		if (t > tmin&&beta+gama<1&&beta>0&&gama>0){
+		if (t > tmin&&beta+gama<=1&&beta>=0&&gama>=0){
 			if (t < h.getT()) {
 				h.set(t, material, _normal, r);
 				return true;

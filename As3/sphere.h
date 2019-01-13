@@ -8,8 +8,8 @@ private:
 	float radius;
 	Vec3f center;
 	Vec3f pt2localxyz(float phi, float theta) {
-		float rphi = phi /180 * M_PI;
-		float rtheta = theta / 180 * M_PI;
+		float rphi = phi /180.0f * M_PI;
+		float rtheta = theta / 180.0f * M_PI;
 		float y = sin(rphi)*radius;
 		float z = cos(rtheta)*cos(rphi)*radius;
 		float x = sin(rtheta)*cos(rphi)*radius;
@@ -26,6 +26,9 @@ private:
 	}
 public:
 	Sphere(Vec3f _center, float _radius, Material* _material) :Object3D(_material),radius(_radius), center(_center){}
+	virtual bool intersectShadowRay(const Ray &r, Hit &h, float tmin) override {
+		return intersect(r, h, tmin);
+	}
 	virtual bool intersect(const Ray &r, Hit &h, float tmin) {
 		Vec3f origin = r.getOrigin() - center;
 		Vec3f dir = r.getDirection();

@@ -80,10 +80,10 @@ void PerspectiveCamera::truckCamera(float dx, float dy)
 void PerspectiveCamera::rotateCamera(float rx, float ry)
 {
 	float tiltAngle = acos(world_up.Dot3(direction));
-	if (tiltAngle - ry > 3.13)
-		ry = tiltAngle - 3.13;
-	else if (tiltAngle - ry < 0.01)
-		ry = tiltAngle - 0.01;
+	if (tiltAngle - ry > 3.13f)
+		ry = tiltAngle - 3.13f;
+	else if (tiltAngle - ry < 0.01f)
+			ry = tiltAngle - 0.01f;
 
 	Matrix rotMat = Matrix::MakeAxisRotation(world_up, rx);
 	rotMat *= Matrix::MakeAxisRotation(horizontal, ry);

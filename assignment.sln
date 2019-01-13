@@ -9,7 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "As1", "As1\As1.vcxproj", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "As2", "As2\As2.vcxproj", "{0FD5B5CE-BDC4-418E-9760-CB1489D57C11}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "As3", "As3\As3.vcxproj", "{D1A73FE1-8B98-4C00-BF77-ACB1F7B5C5BD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "As3andLater", "As3\As3.vcxproj", "{D1A73FE1-8B98-4C00-BF77-ACB1F7B5C5BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

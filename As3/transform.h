@@ -14,6 +14,9 @@ public:
 		_m_inv_tr = _m_inv;
 		_m_inv_tr.Transpose();
 	}
+	virtual bool intersectShadowRay(const Ray &r, Hit &h, float tmin) override {
+		return intersect(r, h, tmin);
+	}
 	virtual bool intersect(const Ray &r, Hit &h, float tmin) {
 		Vec3f orgin = r.getOrigin();
 		Vec3f dir = r.getDirection();

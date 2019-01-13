@@ -11,6 +11,8 @@
 #include "group.h"
 #include "glCanvas.h"
 #include "GL/freeglut.h"
+#include "RayTracer.h"
+#include "rayTree.h"
 using namespace std;
 
 
@@ -51,10 +53,21 @@ char *depth_file = NULL;
 char *normals_file = NULL;
 bool shade_back = false;
 bool gui = false;
+bool shadows = false;
+int bounces = 0;
+float weight = 0;
 SceneParser* scene = NULL;
 
 
 void render();
+void debugTracerRay(float x, float y) {
+	Hit h(INFINITY, NULL, { 0,0,1 });
+	auto cam = scene->getCamera();
+	Ray r = cam->generateRay({ x,y });
+	RayTracer tracer(scene, bounces, weight, shadows, shade_back);
+	tracer.traceRay(r, cam->getTMin(), 0, 1, 1, h);
+	RayTree::SetMainSegment(r, 0, h.getT());
+}
 int main(int argc, char* argv[]) {
 	// sample command line:
 	// raytracer -input scene1_1.txt -size 200 200 -output output1_1.tga -depth 9 10 depth1_1.tga
@@ -103,6 +116,17 @@ int main(int argc, char* argv[]) {
 		else if (!strcmp(argv[i], "-gui")) {
 			gui = true;
 		}
+		else if (!strcmp(argv[i], "-shadows")) {
+			shadows = true;
+		}
+		else if (!strcmp(argv[i], "-bounces")) {
+			i++; assert(i < argc);
+			bounces = atoi(argv[i]);
+		}
+		else if (!strcmp(argv[i], "-weight")) {
+			i++; assert(i < argc);
+			weight = atof(argv[i]);
+		}
 		else {
 			printf("whoops error with command line argument %d: '%s'\n", i, argv[i]);
 			assert(0);
@@ -112,7 +136,7 @@ int main(int argc, char* argv[]) {
 	if (gui) {
 		glutInit(&argc, argv);
 		GLCanvas glcanvas;
-		glcanvas.initialize(scene,render);
+		glcanvas.initialize(scene,render,debugTracerRay);
 	}
 	else {
 		render();
@@ -136,41 +160,15 @@ void render() {
 		normal_img = new Image(width, height);
 		normal_img->SetAllPixels({ 0,0,0 });
 	}
-	Group* g = scene->getGroup();
 	Camera* cam = scene->getCamera();
+	RayTracer tracer(scene, bounces, weight, shadows, shade_back);
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
 			Hit h(INFINITY, NULL, { 0,0,1 });
 			Ray r = cam->generateRay({ i*1.0f / width,j*1.0f / width });
-			bool hited = g->intersect(r, h, cam->getTMin());
-			if (hited) {
-				Vec3f hit_normal = h.getNormal();
-				bool back = hit_normal.Dot3(r.getDirection()) > 0;
-				if (back&&shade_back == false) {
-					if (color_img)
-						color_img->SetPixel(i, j, { 0,0,0 });
-					if (depth_img)
-						depth_img->SetPixel(i, j, { 0,0,0 });
-					if (normal_img)
-						normal_img->SetPixel(i, j, { 0,0,0 });
-					continue;
-				}
-				if (back) hit_normal.Negate();
-				h.set(h.getT(), h.getMaterial(), hit_normal, r);
-				Vec3f pixel_color;
-				if (color_img) {
-					diffuse_shader(*scene, h, pixel_color, r);
-					color_img->SetPixel(i, j, pixel_color);
-				}
-				if (depth_img) {
-					depth_shader(h, depth_max, depth_min, pixel_color);
-					depth_img->SetPixel(i, j, pixel_color);
-				}
-				if (normal_img) {
-					normal_shader(h, pixel_color);
-					normal_img->SetPixel(i, j, pixel_color);
-				}
-			}
+			auto color = tracer.traceRay(r, cam->getTMin(), 0, 1, 1, h);
+			if(color_img)
+				color_img->SetPixel(i, j, color);
 		}
 	}
 	if (color_img) color_img->SaveTGA(output_file);

@@ -56,9 +56,9 @@ public:
 		world_up.Normalize();
 	}
 	virtual Ray generateRay(Vec2f point) {
-		float x = point.x()-0.5;
-		float y = point.y()-0.5;
-		float z = 0.5 / tan(angle / 2);
+		float x = point.x()-0.5f;
+		float y = point.y()-0.5f;
+		float z = 0.5f / tan(angle / 2);
 		Vec3f p = horizontal * x + up * y + direction * z;
 		Vec3f dir = p;
 		dir.Normalize();

@@ -18,6 +18,12 @@ public:
 		}
 		return res;
 	}
+	virtual bool intersectShadowRay(const Ray &r, Hit &h, float tmin) override {
+		for (auto o : objs) {
+			if (o->intersect(r, h, tmin)) return true;
+		}
+		return false;
+	}
 	virtual void paint() {
 		for (auto o : objs) {
 			o->paint();
