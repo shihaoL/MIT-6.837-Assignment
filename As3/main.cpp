@@ -56,16 +56,18 @@ bool gui = false;
 bool shadows = false;
 int bounces = 0;
 float weight = 0;
+bool visual_grid = false;
+bool use_grid = false;
+int nx, ny, nz;
 SceneParser* scene = NULL;
-
+RayTracer* tracer = NULL;
 
 void render();
 void debugTracerRay(float x, float y) {
 	Hit h(INFINITY, NULL, { 0,0,1 });
 	auto cam = scene->getCamera();
 	Ray r = cam->generateRay({ x,y });
-	RayTracer tracer(scene, bounces, weight, shadows, shade_back);
-	tracer.traceRay(r, cam->getTMin(), 0, 1, 1, h);
+	tracer->traceRay(r, cam->getTMin(), 0, 1, 1, h);
 	RayTree::SetMainSegment(r, 0, h.getT());
 }
 int main(int argc, char* argv[]) {
@@ -127,16 +129,29 @@ int main(int argc, char* argv[]) {
 			i++; assert(i < argc);
 			weight = atof(argv[i]);
 		}
+		else if (!strcmp(argv[i], "-grid")) {
+			use_grid = true;
+			i++; assert(i < argc);
+			nx = atoi(argv[i]);
+			i++; assert(i < argc);
+			ny = atoi(argv[i]);
+			i++; assert(i < argc);
+			nz = atoi(argv[i]);
+		}
+		else if (!strcmp(argv[i], "-visualize_grid")) {
+			visual_grid = true;
+		}
 		else {
 			printf("whoops error with command line argument %d: '%s'\n", i, argv[i]);
 			assert(0);
 		}
 	}
 	scene = new SceneParser(input_file);
+	tracer = new RayTracer(scene, bounces, weight, shadows, shade_back, visual_grid, use_grid, nx, ny, nz);
 	if (gui) {
 		glutInit(&argc, argv);
 		GLCanvas glcanvas;
-		glcanvas.initialize(scene,render,debugTracerRay);
+		glcanvas.initialize(scene,render,debugTracerRay,tracer->grid,visual_grid);
 	}
 	else {
 		render();
@@ -161,12 +176,12 @@ void render() {
 		normal_img->SetAllPixels({ 0,0,0 });
 	}
 	Camera* cam = scene->getCamera();
-	RayTracer tracer(scene, bounces, weight, shadows, shade_back);
+	
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
 			Hit h(INFINITY, NULL, { 0,0,1 });
 			Ray r = cam->generateRay({ i*1.0f / width,j*1.0f / width });
-			auto color = tracer.traceRay(r, cam->getTMin(), 0, 1, 1, h);
+			auto color = tracer->traceRay(r, cam->getTMin(), 0, 1, 1, h);
 			if(color_img)
 				color_img->SetPixel(i, j, color);
 		}

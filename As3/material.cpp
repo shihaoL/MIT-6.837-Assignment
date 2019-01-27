@@ -7,6 +7,12 @@
 // with glCanvas::display
 extern int SPECULAR_FIX_WHICH_PASS;
 #endif
+
+PhongMaterial RED({ 1,0,0 }, { 0,0,0 }, 1, { 0,0,0 }, { 0,0,0 }, 1);
+PhongMaterial GREEN({0,1,0 }, { 0,0,0 }, 1, { 0,0,0 }, { 0,0,0 }, 1);
+PhongMaterial BLUE({ 0,0,1 }, { 0,0,0 }, 1, { 0,0,0 }, { 0,0,0 }, 1);
+PhongMaterial WHITE({ 1,1,1 }, { 0,0,0 }, 1, { 0,0,0 }, { 0,0,0 }, 1);
+PhongMaterial GRAY({ 0.5,0.5,0.5 }, { 0,0,0 }, 1, { 0,0,0 }, { 0,0,0 }, 1);
 void PhongMaterial::glSetMaterial(void) const {
 
 	GLfloat one[4] = { 1.0, 1.0, 1.0, 1.0 };

@@ -7,12 +7,38 @@ private:
 	Matrix _m;
 	Matrix _m_inv;
 	Matrix _m_inv_tr;
+	void setBoundingBox()override {
+		auto t_bb = obj->getBoundingBox();
+		auto t_max = t_bb->getMax(), t_min = t_bb->getMin();
+		Vec3f p[8] = {
+			{ t_max[0],t_max[1],t_max[2] },
+		{ t_max[0],t_max[1],t_min[2] },
+		{ t_max[0],t_min[1],t_max[2] },
+		{ t_max[0],t_min[1],t_min[2] },
+		{ t_min[0],t_max[1],t_max[2] },
+		{ t_min[0],t_max[1],t_min[2] },
+		{ t_min[0],t_min[1],t_max[2] },
+		{ t_min[0],t_min[1],t_min[2] }
+		};
+		float maxx = -INFINITY, maxy = -INFINITY, maxz = -INFINITY, minx = INFINITY, miny = INFINITY, minz = INFINITY;
+		for (int i = 0; i < 8; i++) {
+			_m.Transform(p[i]);
+			if (p[i].x() > maxx) maxx = p[i].x();
+			if (p[i].x() < minx) minx = p[i].x();
+			if (p[i].y() > maxy) maxy = p[i].y();
+			if (p[i].y() < miny)miny = p[i].y();
+			if (p[i].z() > maxz) maxz = p[i].z();
+			if (p[i].z() < minz) minz = p[i].z();
+		}
+		bb = new BoundingBox({ minx,miny,minz }, { maxx,maxy,maxz });
+	}
 public:
 	Transform(Matrix &m, Object3D *o) :_m(m), obj(o) {
 		_m_inv = _m;
 		_m_inv.Inverse();
 		_m_inv_tr = _m_inv;
 		_m_inv_tr.Transpose();
+		setBoundingBox();
 	}
 	virtual bool intersectShadowRay(const Ray &r, Hit &h, float tmin) override {
 		return intersect(r, h, tmin);
@@ -42,5 +68,9 @@ public:
 		delete[] glMatrix;
 		obj->paint();
 		glPopMatrix();
+	}
+	void insertIntoGrid(Grid *g, Matrix *m) override {
+		Matrix tmpm = (*m)*_m;
+		obj->insertIntoGrid(g, &tmpm);
 	}
 };

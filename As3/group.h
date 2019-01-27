@@ -6,8 +6,20 @@ public:
 	void addObject(int index, Object3D *obj) {
 		assert(index < objs.size());
 		objs[index] = obj;
+		if (obj->getBoundingBox()) {
+			if (bb == nullptr) bb = new BoundingBox(*obj->getBoundingBox());
+			else {
+				bb->Extend(obj->getBoundingBox());
+			}
+		}
+	}
+	void insertIntoGrid(Grid *g, Matrix *m) {
+		for (auto o : objs) {
+			o->insertIntoGrid(g, m);
+		}
 	}
 	Group(int size) {
+		setBoundingBox();
 		objs.resize(size);
 	}
 	virtual bool intersect(const Ray &r, Hit &h, float tmin) {
@@ -31,4 +43,7 @@ public:
 	}
 private:
 	std::vector<Object3D*> objs;
+	void setBoundingBox()override {
+		bb = nullptr;
+	}
 };

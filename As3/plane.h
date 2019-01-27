@@ -5,8 +5,13 @@ private:
 	const int big_num = 10000;
 	Vec3f _normal;
 	float _d;
+	void setBoundingBox()override{
+		bb = nullptr;
+	}
 public:
-	Plane(Vec3f &normal, float d, Material *m):_normal(normal),_d(d), Object3D(m){}
+	Plane(Vec3f &normal, float d, Material *m):_normal(normal),_d(d), Object3D(m){
+		setBoundingBox();
+	}
 	virtual bool intersectShadowRay(const Ray &r, Hit &h, float tmin) override {
 		return intersect(r, h, tmin);
 	}

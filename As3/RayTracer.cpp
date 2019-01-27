@@ -7,7 +7,8 @@ Vec3f RayTracer::traceRay(Ray & ray, float tmin, int bounces, float weight, floa
 {
 	if (weight <= cutoff_weight) return{ 0,0,0 };
 	if (bounces > max_bounces) return { 0,0,0 };
-	auto group = s->getGroup();
+	Object3D* group = s->getGroup();
+	if (visual_grid) group = grid;
 	bool hited = group->intersect(ray, hit, tmin);
 	if (hited) {
 		bool back = hit.getNormal().Dot3(ray.getDirection()) > 0;
@@ -31,7 +32,7 @@ Vec3f RayTracer::traceRay(Ray & ray, float tmin, int bounces, float weight, floa
 			//shadow cast
 			Ray shadow_ray(hit_point, light_dir);
 			Hit shadow_hit(distance_to_light, NULL, { 0,1,0 });
-			if (!group->intersectShadowRay(shadow_ray, shadow_hit, epsilon)) {
+			if (visual_grid||!group->intersectShadowRay(shadow_ray, shadow_hit, epsilon)) {
 				res += material->Shade(ray, hit, light_dir, light_col);
 			}
 			else {

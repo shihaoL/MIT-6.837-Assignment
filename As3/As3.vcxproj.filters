@@ -69,6 +69,12 @@
     <ClInclude Include="RayTracer.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="boundingbox.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="image.cpp">
@@ -99,6 +105,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="RayTracer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="boundingbox.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

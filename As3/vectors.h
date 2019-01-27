@@ -187,6 +187,10 @@ public:
 		assert(i >= 0 && i < 3);
 		return data[i];
 	}
+	float& operator[](int i){
+		assert(i >= 0 && i < 3);
+		return data[i];
+	}
 	float x() const { return data[0]; }
 	float y() const { return data[1]; }
 	float z() const { return data[2]; }

@@ -1,6 +1,6 @@
 #pragma once
 #include "object3d.h"
-
+#include "Grid.h"
 extern float theta_step, phi_step;
 extern bool gouraud;
 class Sphere :public Object3D {
@@ -24,8 +24,13 @@ private:
 		n.Normalize();
 		return n;
 	}
+	void setBoundingBox() override {
+		bb = new BoundingBox(center - Vec3f(radius, radius, radius), center + Vec3f(radius, radius, radius));
+	}
 public:
-	Sphere(Vec3f _center, float _radius, Material* _material) :Object3D(_material),radius(_radius), center(_center){}
+	Sphere(Vec3f _center, float _radius, Material* _material) :Object3D(_material),radius(_radius), center(_center){
+		setBoundingBox();
+	}
 	virtual bool intersectShadowRay(const Ray &r, Hit &h, float tmin) override {
 		return intersect(r, h, tmin);
 	}
@@ -85,5 +90,35 @@ public:
 			}
 		}
 		glEnd();
+	}
+	void insertIntoGrid(Grid *g, Matrix *m) override {
+		Matrix I;
+		I.SetToIdentity();
+		if (*m==I) {
+			auto tmin = g->getBoundingBox()->getMin();
+			auto tmax = g->getBoundingBox()->getMax();
+			float dx = (tmax.x() - tmin.x()) / g->nx;
+			float dy = (tmax.y() - tmin.y()) / g->ny;
+			float dz = (tmax.z() - tmin.z()) / g->nz;
+			Vec3f h(dx / 2, dy / 2, dz / 2);
+			for (int z = 0; z < g->nz; z++) {
+				for (int y = 0; y < g->ny; y++) {
+					for (int x = 0; x < g->nx; x++) {
+						float px = x * dx + tmin.x()+h.x();
+						float py = y * dy + tmin.y()+h.y();
+						float pz = z * dz + tmin.z()+h.z();
+						Vec3f v(abs(center.x()-px), abs(center.y()-py), abs(center.z()-pz));
+						Vec3f u = v - h;
+						for (int i = 0; i < 3; i++) {
+							if (u[i] < 0) u[i] = 0;
+						}
+						if (u.Length() < radius) g->setOpaque(x, y, z, this);
+					}
+				}
+			}
+		}
+		else {
+			g->transform_into_Grid(bb, m, this);
+		}
 	}
 };

@@ -88,4 +88,9 @@ private:
 // ====================================================================
 // ====================================================================
 
+extern PhongMaterial RED;
+extern PhongMaterial WHITE;
+extern PhongMaterial BLUE;
+extern PhongMaterial GREED;
+extern PhongMaterial GRAY;
 #endif
