@@ -8,8 +8,17 @@ Vec3f RayTracer::traceRay(Ray & ray, float tmin, int bounces, float weight, floa
 	if (weight <= cutoff_weight) return{ 0,0,0 };
 	if (bounces > max_bounces) return { 0,0,0 };
 	Object3D* group = s->getGroup();
-	if (visual_grid) group = grid;
-	bool hited = group->intersect(ray, hit, tmin);
+	bool hited = false;
+	if (visual_grid) {
+		hited = grid->intersectGrid(ray, hit, tmin);
+	}
+	else {
+		if (grid) {
+			group = grid;
+			//hited = group->intersect(ray, hit, tmin);
+		}
+		hited = group->intersect(ray, hit, tmin);
+	}
 	if (hited) {
 		bool back = hit.getNormal().Dot3(ray.getDirection()) > 0;
 		if (back && !shade_back) return { 0,0,0 };
@@ -32,7 +41,8 @@ Vec3f RayTracer::traceRay(Ray & ray, float tmin, int bounces, float weight, floa
 			//shadow cast
 			Ray shadow_ray(hit_point, light_dir);
 			Hit shadow_hit(distance_to_light, NULL, { 0,1,0 });
-			if (visual_grid||!group->intersectShadowRay(shadow_ray, shadow_hit, epsilon)) {
+			RayTracingStats::IncrementNumShadowRays();
+			if (!shadows||visual_grid||!group->intersectShadowRay(shadow_ray, shadow_hit, epsilon)) {
 				res += material->Shade(ray, hit, light_dir, light_col);
 			}
 			else {
@@ -46,6 +56,7 @@ Vec3f RayTracer::traceRay(Ray & ray, float tmin, int bounces, float weight, floa
 			auto cur_depth = bounces + 1;
 			Ray reflect_ray(hit_point, reflectDir);
 			Hit reflect_hit(INFINITY, NULL, { 0,1,0 });
+			RayTracingStats::IncrementNumNonShadowRays();
 			auto reflectColor = traceRay(reflect_ray, epsilon, cur_depth, cur_weight, indexOfRefraction, reflect_hit);
 			RayTree::AddReflectedSegment(reflect_ray, epsilon, reflect_hit.getT());
 			res += material->getReflectionColor()*reflectColor;
@@ -67,6 +78,7 @@ Vec3f RayTracer::traceRay(Ray & ray, float tmin, int bounces, float weight, floa
 				Hit refract_hit(INFINITY, NULL, { 0,1,0 });
 				auto cur_weight = weight * material->getTransparentColor().Length();
 				auto cur_depth = bounces + 1;
+				RayTracingStats::IncrementNumNonShadowRays();
 				auto refractColor = traceRay(refract_ray, epsilon, cur_depth, cur_weight, index_t, refract_hit);
 				RayTree::AddTransmittedSegment(refract_ray, epsilon, refract_hit.getT());
 				res += material->getTransparentColor()*refractColor;

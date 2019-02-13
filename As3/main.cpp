@@ -13,6 +13,9 @@
 #include "GL/freeglut.h"
 #include "RayTracer.h"
 #include "rayTree.h"
+#include "film.h"
+#include "Filter.h"
+#include "Sampler.h"
 using namespace std;
 
 
@@ -59,6 +62,25 @@ float weight = 0;
 bool visual_grid = false;
 bool use_grid = false;
 int nx, ny, nz;
+bool stats = false;
+bool use_render_samples = false;
+char* render_sample_name = NULL;
+int render_sample_zoom_factor = 0;
+bool box_filter = false;
+float box_radius = 0.0f;
+bool tent_filter = false;
+float tent_radius = 0.0f;
+bool gaussian_filter = false;
+float gaussian_sigma = 0.0f;
+bool use_render_filter = false;
+char* render_filter_name = NULL;
+int render_filter_zoom_factor=0;
+int num_samples = 1;
+bool uniform_samples = false;
+bool jitter_samples = false;
+bool random_samples = false;
+
+
 SceneParser* scene = NULL;
 RayTracer* tracer = NULL;
 
@@ -141,6 +163,53 @@ int main(int argc, char* argv[]) {
 		else if (!strcmp(argv[i], "-visualize_grid")) {
 			visual_grid = true;
 		}
+		else if (!strcmp(argv[i], "-stats")) {
+			stats = true;
+		}
+		else if (!strcmp(argv[i], "-render_samples")) {
+			use_render_samples = true;
+			i++; assert(i < argc);
+			render_sample_name = argv[i];
+			i++; assert(i < argc);
+			render_sample_zoom_factor = atoi(argv[i]);
+		}
+		else if (!strcmp(argv[i], "-render_filter")) {
+			use_render_filter = true;
+			i++; assert(i < argc);
+			render_filter_name = argv[i];
+			i++; assert(i < argc);
+			render_filter_zoom_factor = atoi(argv[i]);
+		}
+		else if (!strcmp(argv[i], "-box_filter")) {
+			box_filter = true;
+			i++; assert(i < argc);
+			box_radius = atof(argv[i]);
+		}
+		else if (!strcmp(argv[i], "-tent_filter")) {
+			tent_filter = true;
+			i++; assert(i < argc);
+			tent_radius = atof(argv[i]);
+		}
+		else if (!strcmp(argv[i], "-gaussian_filter")) {
+			gaussian_filter = true;
+			i++; assert(i < argc);
+			gaussian_sigma = atof(argv[i]);
+		}
+		else if (!strcmp(argv[i], "-random_samples")) {
+			random_samples = true;
+			i++; assert(i < argc);
+			num_samples = atoi(argv[i]);
+		}
+		else if (!strcmp(argv[i], "-jittered_samples")) {
+			jitter_samples = true;
+			i++; assert(i < argc);
+			num_samples = atoi(argv[i]);
+		}
+		else if (!strcmp(argv[i], "-uniform_samples")) {
+			uniform_samples = true;
+			i++; assert(i < argc);
+			num_samples = atoi(argv[i]);
+		}
 		else {
 			printf("whoops error with command line argument %d: '%s'\n", i, argv[i]);
 			assert(0);
@@ -176,15 +245,63 @@ void render() {
 		normal_img->SetAllPixels({ 0,0,0 });
 	}
 	Camera* cam = scene->getCamera();
-	
+	RayTracingStats::Initialize(width,height,scene->getGroup()->getBoundingBox(),
+		nx,ny,nz);
+	Film film(width, height, num_samples);
+	shared_ptr<Sampler> sampler = nullptr;
+	using sampler_ptr = shared_ptr<Sampler>;
+	if (uniform_samples) {
+		sampler = sampler_ptr(new UniformSampler(num_samples));
+	}
+	else if (random_samples) {
+		sampler = sampler_ptr(new RandomSampler(num_samples));
+	}
+	else if (jitter_samples) {
+		sampler = sampler_ptr(new JitteredSampler(num_samples));
+	}
+	else {
+		sampler = sampler_ptr(new UniformSampler(1));
+	}
+	shared_ptr<Filter> filter = nullptr;
+	using filter_ptr = shared_ptr<Filter>;
+	if (box_filter) {
+		filter = filter_ptr(new BoxFilter(box_radius));
+	}
+	else if (tent_filter) {
+		filter = filter_ptr(new TentFilter(tent_radius));
+	}
+	else if (gaussian_filter) {
+		filter = filter_ptr(new GaussianFilter(gaussian_sigma));
+	}
+	else {
+		filter = filter_ptr(new BoxFilter(0.001));
+	}
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
-			Hit h(INFINITY, NULL, { 0,0,1 });
-			Ray r = cam->generateRay({ i*1.0f / width,j*1.0f / width });
-			auto color = tracer->traceRay(r, cam->getTMin(), 0, 1, 1, h);
-			if(color_img)
-				color_img->SetPixel(i, j, color);
+			for (int k = 0; k < num_samples; k++) {
+				auto p = sampler->getSamplePosition(k);
+				float x = i + p.x(), y = j + p.y();
+				Hit h(INFINITY, NULL, { 0,0,1 });
+				Ray r = cam->generateRay({ x / width,y / height });
+				RayTracingStats::IncrementNumNonShadowRays();
+				auto color = tracer->traceRay(r, cam->getTMin(), 0, 1, 1, h);
+				film.setSample(i, j, k, p, color);
+				
+			}
+			
 		}
+	}
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
+			if (color_img)
+				color_img->SetPixel(i, j, filter->getColor(i, j, &film));
+		}
+	}
+	if (use_render_samples) {
+		film.renderSamples(render_sample_name, render_sample_zoom_factor);
+	}
+	if (use_render_filter) {
+		film.renderFilter(render_filter_name, render_filter_zoom_factor, filter.get());
 	}
 	if (color_img) color_img->SaveTGA(output_file);
 	if (depth_img) depth_img->SaveTGA(depth_file);
@@ -193,4 +310,7 @@ void render() {
 	delete depth_img;
 	delete normal_img;
 	printf("render ok\n");
+	if (stats) {
+		RayTracingStats::PrintStatistics();
+	}
 }

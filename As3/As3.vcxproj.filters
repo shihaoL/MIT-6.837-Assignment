@@ -75,6 +75,36 @@
     <ClInclude Include="Grid.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="raytracing_stats.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckerBoard.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="perlin_noise.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Noise.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Marble.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Wood.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="sample.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="film.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Sampler.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Filter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="image.cpp">
@@ -108,6 +138,18 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="boundingbox.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="raytracing_stats.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckerBoard.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="perlin_noise.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="film.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

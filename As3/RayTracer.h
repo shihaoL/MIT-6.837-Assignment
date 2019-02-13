@@ -5,6 +5,7 @@
 #include "Grid.h"
 #include "matrix.h"
 #include "group.h"
+#include "raytracing_stats.h"
 class RayTracer
 {
 public:
@@ -20,9 +21,9 @@ public:
 		}
 		auto g = s->getGroup();
 		grid = new Grid(g->getBoundingBox(), nx, ny, nz);
-		Matrix m;
-		m.SetToIdentity();
-		g->insertIntoGrid(grid, &m);
+		Matrix* m=new Matrix();
+		m->SetToIdentity();
+		g->insertIntoGrid(grid, m);
 	}
 	~RayTracer() {}
 	Vec3f traceRay(Ray &ray, float tmin, int bounces, float weight,

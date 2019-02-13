@@ -3,7 +3,8 @@
 #include "rayTree.h"
 #include "matrix.h"
 #include <vector>
-
+#include "transform.h"
+#include "raytracing_stats.h"
 struct MarchingInfo {
 	bool hit;
 	float tmin;
@@ -12,7 +13,19 @@ struct MarchingInfo {
 	float d[3];
 	int sign[3];
 	int hit_axis=0;
+	float peek_next_t() {
+		int min_idx = -1;
+		float min_t = -INFINITY;
+		for (int i = 0; i < 3; i++) {
+			if (t_next[i] >= min_t) {
+				min_t = t_next[i];
+				min_idx = i;
+			}
+		}
+		return min_t;
+	}
 	void nextCell() {
+		RayTracingStats::IncrementNumGridCellsTraversed();
 		int min_idx = -1;
 		float min_t = INFINITY;
 		for (int i = 0; i < 3; i++) {
@@ -41,10 +54,22 @@ class Grid :
 {
 private:
 	float dx, dy, dz;
-	std::vector<vector<Object3D*>> opaque;
+	std::vector<vector<Transform*>> opaque;
+	std::vector<Transform*> infinity;
 	void setBoundingBox()override {
 	}
+	bool intersectInfinity(const Ray& r, Hit& h, float tmin) {
+		bool res = false;
+		for (auto o : infinity) {
+			bool ok = o->intersect(r, h, tmin);
+			res = res || ok;
+		}
+		return res;
+	}
 public:
+	void intoInfinityGrid(Transform* value) {
+		infinity.push_back(value);
+	}
 	void initializeRayMarch(MarchingInfo &mi, const Ray &r, float tmin) const {
 		auto dir = r.getDirection();
 		auto origin = r.getOrigin();
@@ -130,23 +155,23 @@ public:
 		mi.d[1] = abs(dy / dir.y());
 		mi.d[2] = abs(dz / dir.z());
 	}
-	virtual bool intersect(const Ray &r, Hit &h, float tmin) {
+	bool intersectGrid(const Ray &r, Hit &h, float tmin) {
 		MarchingInfo mi;
 		initializeRayMarch(mi, r, tmin);
 		if (mi.hit == false) return false;
 		while (!mi.is_end(nx, ny, nz)) {
 			int  x = mi.idx[0], y = mi.idx[1], z = mi.idx[2];
-			if (checkOpaque(x,y,z)) {
+			if (checkOpaque(x, y, z)) {
 				{
 					float xx = x * dx + bb->getMin().x();
 					float yy = y * dy + bb->getMin().y();
 					float zz = z * dz + bb->getMin().z();
-					RayTree::AddHitCellFace({ xx,yy,zz }, { xx + dx,yy,zz }, { xx + dx, yy + dy, zz }, { xx, yy + dy, zz }, { 0, 0, -1 },&RED);
-					RayTree::AddHitCellFace({ xx,yy,zz }, { xx + dx, yy, zz }, { xx + dx, yy, zz + dz }, { xx, yy, zz + dz }, { 0, -1, 0 },&RED);
-					RayTree::AddHitCellFace({ xx, yy + dy, zz }, { xx + dx, yy + dy, zz }, { xx + dx, yy + dy, zz + dz }, { xx, yy + dy, zz + dz }, { 0, 1, 0 },&RED);
-					RayTree::AddHitCellFace({ xx, yy, zz }, { xx, yy + dy, zz }, { xx, yy + dy, zz + dz }, { xx, yy, zz + dz }, { -1, 0, 0 },&RED);
-					RayTree::AddHitCellFace({ xx + dx, yy, zz }, { xx + dx, yy + dy, zz }, { xx + dx, yy + dy, zz + dz }, { xx + dx, yy, zz + dz }, { 1, 0, 0 },&RED);
-					RayTree::AddHitCellFace({ xx, yy, zz + dz }, { xx + dx, yy, zz + dz }, { xx + dx, yy + dy, zz + dz }, { xx, yy + dy, zz + dz }, { 0, 0, 1 },&RED);
+					RayTree::AddHitCellFace({ xx,yy,zz }, { xx + dx,yy,zz }, { xx + dx, yy + dy, zz }, { xx, yy + dy, zz }, { 0, 0, -1 }, &RED);
+					RayTree::AddHitCellFace({ xx,yy,zz }, { xx + dx, yy, zz }, { xx + dx, yy, zz + dz }, { xx, yy, zz + dz }, { 0, -1, 0 }, &RED);
+					RayTree::AddHitCellFace({ xx, yy + dy, zz }, { xx + dx, yy + dy, zz }, { xx + dx, yy + dy, zz + dz }, { xx, yy + dy, zz + dz }, { 0, 1, 0 }, &RED);
+					RayTree::AddHitCellFace({ xx, yy, zz }, { xx, yy + dy, zz }, { xx, yy + dy, zz + dz }, { xx, yy, zz + dz }, { -1, 0, 0 }, &RED);
+					RayTree::AddHitCellFace({ xx + dx, yy, zz }, { xx + dx, yy + dy, zz }, { xx + dx, yy + dy, zz + dz }, { xx + dx, yy, zz + dz }, { 1, 0, 0 }, &RED);
+					RayTree::AddHitCellFace({ xx, yy, zz + dz }, { xx + dx, yy, zz + dz }, { xx + dx, yy + dy, zz + dz }, { xx, yy + dy, zz + dz }, { 0, 0, 1 }, &RED);
 				}
 				float normal[3] = { 0,0,0 };
 				normal[mi.hit_axis] = 1;
@@ -159,16 +184,67 @@ public:
 		}
 		return false;
 	}
+	virtual bool intersect(const Ray &r, Hit &h, float tmin) {
+		Hit ih = h;
+		bool hit_infinity = intersectInfinity(r, ih, tmin);
+		MarchingInfo mi;
+		initializeRayMarch(mi, r, tmin);
+		if (mi.hit == false) {
+			if (!hit_infinity) {
+				return false;
+			}
+			else {
+				h = ih;
+				return true;
+			}
+		}
+		while (!mi.is_end(nx, ny, nz)) {
+			int  x = mi.idx[0], y = mi.idx[1], z = mi.idx[2];
+			if (checkOpaque(x,y,z)) {
+				auto th = h;
+				auto& ps = getOpaque(x, y, z);
+				bool res = false;
+				for (auto o : ps) {
+					if (o->ray == r) {
+						continue;
+					}
+					bool ok = o->intersect(r, th, tmin);
+					if(!ok) o->ray=r;
+					res = res || ok;
+				}
+				if (res) {
+					auto ht = th.getT();
+					if (ht >= mi.tmin-0.001f&&ht <= mi.peek_next_t()+0.001f) {
+						if (hit_infinity&&ht >= ih.getT()) {
+							h = ih;
+							return true;
+						}
+						h = th;
+						return res;
+					}
+					else {
+						//cout << "out: " << ht << " " << mi.tmin << " " << mi.peek_next_t()<<endl;
+					}
+				}
+			}
+			mi.nextCell();
+		}
+		if (hit_infinity) {
+			h = ih;
+			return true;
+		}
+		return false;
+	}
 	virtual bool intersectShadowRay(const Ray &r, Hit &h, float tmin) {
 		return intersect(r, h, tmin);
 	}
-	void setOpaque(int x, int y, int z, Object3D* value) {
+	void setOpaque(int x, int y, int z, Transform* value) {
 		opaque[z*(nx*ny) + y * nx + x].push_back(value);
 	}
 	bool checkOpaque(int x, int y, int z) {
 		return !opaque[z*(nx*ny) + y * nx + x].empty();
 	}
-	vector<Object3D*>& getOpaque(int x, int y, int z) {
+	vector<Transform*>& getOpaque(int x, int y, int z) {
 		return opaque[z*(nx*ny) + y * nx + x];
 	}
 	int nx, ny, nz;
@@ -240,7 +316,7 @@ public:
 		}
 		glEnd();
 	}
-	void intoGrid(Vec3f tmin,Vec3f tmax,Object3D* value) {
+	void intoGrid(Vec3f tmin,Vec3f tmax, Transform* value) {
 		auto bmin = bb->getMin();
 		auto bmax = bb->getMax();
 		int xmin = floor((tmin.x() - bmin.x()) / (bmax.x() - bmin.x())*nx);
@@ -263,7 +339,7 @@ public:
 			}
 		}
 	}
-	void transform_into_Grid(BoundingBox* t_bb, Matrix* _m,Object3D* value) {
+	void transform_into_Grid(BoundingBox* t_bb, Matrix* _m, Transform* value) {
 		auto t_max = t_bb->getMax(), t_min = t_bb->getMin();
 		Vec3f p[8] = {
 			{ t_max[0],t_max[1],t_max[2] },

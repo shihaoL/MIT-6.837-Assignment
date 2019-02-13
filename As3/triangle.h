@@ -1,6 +1,7 @@
 #pragma once
 #include "object3d.h"
 #include <algorithm>
+#include "raytracing_stats.h"
 class Triangle :public Object3D {
 public:
 	Triangle(Vec3f &a, Vec3f &b, Vec3f &c, Material *m) :Object3D(m), _a(a), _b(b), _c(c) {
@@ -9,15 +10,14 @@ public:
 		setBoundingBox();
 	}
 	void insertIntoGrid(Grid *g, Matrix *m) override {
-		if (m != nullptr) {
-			g->transform_into_Grid(bb, m, this);
-			//g->intoGrid(bb->getMin(), bb->getMax(), this);
-		}
+		Transform* t = new Transform(*m, this);
+		g->transform_into_Grid(bb, m, t);
 	}
 	virtual bool intersectShadowRay(const Ray &r, Hit &h, float tmin) override {
 		return intersect(r, h, tmin);
 	}
 	virtual bool intersect(const Ray &r, Hit &h, float tmin) {
+		RayTracingStats::IncrementNumIntersections();
 		Vec3f dir = r.getDirection();
 		Vec3f origin = r.getOrigin();
 		if (dir.Dot3(_normal) == 0) return false;
@@ -30,7 +30,7 @@ public:
 		float gama = determinant3(ta, td, tc) / D;
 		float t = determinant3(ta, tb, td) / D;
 		if (t > tmin&&beta+gama<=1&&beta>=0&&gama>=0){
-			if (t < h.getT()) {
+			if (t <= h.getT()) {
 				h.set(t, material, _normal, r);
 				return true;
 			}
@@ -53,8 +53,6 @@ private:
 			a.x()*c.y()*b.z() - a.y()*b.x()*c.z() - a.z()*b.y()*c.x();
 	}
 	void setBoundingBox()override {
-		using std::max;
-		using std::min;
 		float bmax[3], bmin[3];
 		for (int i = 0; i < 3; i++) {
 			if (_a[i] >= _b[i] && _a[i] >= _c[i]) bmax[i] = _a[i];

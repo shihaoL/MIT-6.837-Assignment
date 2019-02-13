@@ -1,5 +1,7 @@
 #pragma once
 #include "object3d.h"
+#include "raytracing_stats.h"
+#include "transform.h"
 class Plane :public Object3D {
 private:
 	const int big_num = 10000;
@@ -16,6 +18,7 @@ public:
 		return intersect(r, h, tmin);
 	}
 	virtual bool intersect(const Ray &r, Hit &h, float tmin) {
+		RayTracingStats::IncrementNumIntersections();
 		Vec3f dir = r.getDirection();
 		Vec3f origin = r.getOrigin();
 		if (dir.Dot3(_normal) == 0) return false;
@@ -48,5 +51,9 @@ public:
 		glVertex3f(p3.x(), p3.y(), p3.z());
 		glVertex3f(p4.x(), p4.y(), p4.z());
 		glEnd();
+	}
+	void insertIntoGrid(Grid *g, Matrix *m)override {
+		Transform* t = new Transform(*m, this);
+		g->intoInfinityGrid(t);
 	}
 };

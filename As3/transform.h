@@ -9,6 +9,7 @@ private:
 	Matrix _m_inv_tr;
 	void setBoundingBox()override {
 		auto t_bb = obj->getBoundingBox();
+		if (t_bb == nullptr) return;
 		auto t_max = t_bb->getMax(), t_min = t_bb->getMin();
 		Vec3f p[8] = {
 			{ t_max[0],t_max[1],t_max[2] },

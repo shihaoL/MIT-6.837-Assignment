@@ -118,35 +118,49 @@
   <ItemGroup>
     <ClInclude Include="boundingbox.h" />
     <ClInclude Include="camera.h" />
+    <ClInclude Include="CheckerBoard.h" />
+    <ClInclude Include="film.h" />
+    <ClInclude Include="Filter.h" />
     <ClInclude Include="glCanvas.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="group.h" />
     <ClInclude Include="hit.h" />
     <ClInclude Include="image.h" />
     <ClInclude Include="light.h" />
+    <ClInclude Include="Marble.h" />
     <ClInclude Include="material.h" />
     <ClInclude Include="matrix.h" />
+    <ClInclude Include="Noise.h" />
     <ClInclude Include="object3d.h" />
+    <ClInclude Include="perlin_noise.h" />
     <ClInclude Include="plane.h" />
     <ClInclude Include="ray.h" />
     <ClInclude Include="RayTracer.h" />
+    <ClInclude Include="raytracing_stats.h" />
     <ClInclude Include="rayTree.h" />
+    <ClInclude Include="sample.h" />
+    <ClInclude Include="Sampler.h" />
     <ClInclude Include="scene_parser.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="transform.h" />
     <ClInclude Include="triangle.h" />
     <ClInclude Include="vectors.h" />
+    <ClInclude Include="Wood.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="boundingbox.cpp" />
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="CheckerBoard.cpp" />
+    <ClCompile Include="film.cpp" />
     <ClCompile Include="glCanvas.cpp" />
     <ClCompile Include="image.cpp" />
     <ClCompile Include="light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="material.cpp" />
     <ClCompile Include="matrix.cpp" />
+    <ClCompile Include="perlin_noise.cpp" />
     <ClCompile Include="RayTracer.cpp" />
+    <ClCompile Include="raytracing_stats.cpp" />
     <ClCompile Include="rayTree.cpp" />
     <ClCompile Include="scene_parser.cpp" />
   </ItemGroup>

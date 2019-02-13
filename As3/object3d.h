@@ -24,6 +24,7 @@ public:
 	virtual void insertIntoGrid(Grid *g, Matrix *m) {
 
 	}
+	Ray  ray;
 protected:
 	virtual void setBoundingBox() = 0;
 	BoundingBox* bb = nullptr;

@@ -27,7 +27,10 @@ public:
   const Vec3f& getDirection() const { return direction; }
   Vec3f pointAtParameter(float t) const {
     return origin+direction*t; }
-
+  bool operator==(const Ray& rhs) {
+	  return origin == rhs.origin&&
+		  direction == rhs.direction;
+  }
 private:
 
   // REPRESENTATION

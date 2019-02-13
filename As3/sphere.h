@@ -35,6 +35,7 @@ public:
 		return intersect(r, h, tmin);
 	}
 	virtual bool intersect(const Ray &r, Hit &h, float tmin) {
+		RayTracingStats::IncrementNumIntersections();
 		Vec3f origin = r.getOrigin() - center;
 		Vec3f dir = r.getDirection();
 		float a = dir.Length()*dir.Length(), b = dir.Dot3(origin) * 2, c = origin.Dot3(origin) - radius * radius;
@@ -50,7 +51,7 @@ public:
 			if (t < tmin) t = (-b + d) / (2 * a);
 		}
 		if (t > tmin) {
-			if (h.getT() > t) {
+			if (h.getT() >= t) {
 				Vec3f hit_point = r.pointAtParameter(t);
 				Vec3f normal = hit_point - center;
 				normal.Normalize();
@@ -92,6 +93,7 @@ public:
 		glEnd();
 	}
 	void insertIntoGrid(Grid *g, Matrix *m) override {
+		Transform* t = new Transform(*m, this);
 		Matrix I;
 		I.SetToIdentity();
 		if (*m==I) {
@@ -112,13 +114,13 @@ public:
 						for (int i = 0; i < 3; i++) {
 							if (u[i] < 0) u[i] = 0;
 						}
-						if (u.Length() < radius) g->setOpaque(x, y, z, this);
+						if (u.Length() < radius) g->setOpaque(x, y, z, t);
 					}
 				}
 			}
 		}
 		else {
-			g->transform_into_Grid(bb, m, this);
+			g->transform_into_Grid(bb, m, t);
 		}
 	}
 };
