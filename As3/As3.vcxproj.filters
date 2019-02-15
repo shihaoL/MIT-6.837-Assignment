@@ -105,6 +105,30 @@
     <ClInclude Include="Filter.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ForceField.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Integrator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="particle.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="particleSet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="random.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="system.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Generator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="parser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="image.cpp">
@@ -150,6 +174,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="film.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="particle.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="system.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="parser.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

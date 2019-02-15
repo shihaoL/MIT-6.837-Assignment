@@ -1,10 +1,10 @@
 #pragma once
 #include "object3d.h"
 #include "Grid.h"
-extern float theta_step, phi_step;
-extern bool gouraud;
 class Sphere :public Object3D {
 private:
+	float theta_step, phi_step;
+	bool gouraud;
 	float radius;
 	Vec3f center;
 	Vec3f pt2localxyz(float phi, float theta) {
