@@ -105,6 +105,18 @@
     <ClInclude Include="Filter.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Spline.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="triangle_mesh.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="arg_parser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="spline_parser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="image.cpp">
@@ -150,6 +162,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="film.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="triangle_mesh.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="spline_parser.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

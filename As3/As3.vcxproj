@@ -86,6 +86,9 @@
       <SDLCheck>false</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
+    <Link>
+      <SubSystem>NotSet</SubSystem>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -116,6 +119,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="arg_parser.h" />
     <ClInclude Include="boundingbox.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="CheckerBoard.h" />
@@ -142,8 +146,11 @@
     <ClInclude Include="Sampler.h" />
     <ClInclude Include="scene_parser.h" />
     <ClInclude Include="sphere.h" />
+    <ClInclude Include="Spline.h" />
+    <ClInclude Include="spline_parser.h" />
     <ClInclude Include="transform.h" />
     <ClInclude Include="triangle.h" />
+    <ClInclude Include="triangle_mesh.h" />
     <ClInclude Include="vectors.h" />
     <ClInclude Include="Wood.h" />
   </ItemGroup>
@@ -163,6 +170,8 @@
     <ClCompile Include="raytracing_stats.cpp" />
     <ClCompile Include="rayTree.cpp" />
     <ClCompile Include="scene_parser.cpp" />
+    <ClCompile Include="spline_parser.cpp" />
+    <ClCompile Include="triangle_mesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
